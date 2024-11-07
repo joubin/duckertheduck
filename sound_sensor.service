@@ -9,11 +9,10 @@ RestartSec=1
 User=root
 WorkingDirectory=/root/duckertheduck/db_sensor
 ExecStart=/root/duckertheduck/db_sensor/venv/bin/python /root/duckertheduck/db_sensor/main.py
-EnvironmentFile=-/root/mine/.env
+EnvironmentFile=/root/duckertheduck/db_sensor/.env
 
 #StandardOutput=syslogConsola               # Output to syslog
 #StandardError=syslogConsola                # Output to syslog
 
 [Install]
 WantedBy=multi-user.target
-
