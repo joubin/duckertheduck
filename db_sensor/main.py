@@ -1,6 +1,3 @@
-# from wensn import connect
-# from wensn import setMode
-# from wensn import readSPL
 import usb.core
 
 import time
