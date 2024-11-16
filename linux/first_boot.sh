@@ -8,10 +8,25 @@ log() {
     echo "[$(date '+%Y-%m-%d %H:%M:%S')] $1"
 }
 
+# Load environment file
+ENV_FILE="/root/duckertheduck/db_sensor/.env"
+if [ ! -f "$ENV_FILE" ]; then
+    log "Error: Environment file not found at $ENV_FILE"
+    exit 1
+fi
+
+# Source the environment file
+source "$ENV_FILE"
+
+# Check if TAILSCALE_AUTH_KEY is set
+if [ -z "$TAILSCALE_AUTH_KEY" ]; then
+    log "Error: TAILSCALE_AUTH_KEY not set in $ENV_FILE"
+    exit 1
+fi
+
 # Remove existing Tailscale repo file (allowed to fail)
 log "Attempting to remove existing Tailscale repo file..."
 rm -rf /etc/yum.repos.d/tailscale.repo || true
-
 
 # Function to check internet connectivity
 check_internet() {
@@ -54,7 +69,7 @@ sleep 5
 
 # Run Tailscale up command
 log "Running Tailscale up command..."
-/usr/bin/tailscale up --auth-key=tskey-auth-k54rWCzzPh11CNTRL-qFTZ4WA1KZMJMQtxhunQUM4PYr3oLa8G --hostname "$NEW_HOSTNAME"
+/usr/bin/tailscale up --auth-key="$TAILSCALE_AUTH_KEY" --hostname "$NEW_HOSTNAME"
 
 # Remove the systemd service file
 log "Removing first_boot service..."
@@ -64,6 +79,10 @@ if [ -f "/etc/systemd/system/first_boot.service" ]; then
     rm /etc/systemd/system/first_boot.service
     systemctl daemon-reload
 fi
+
+# Clean up environment file
+log "Removing environment file..."
+rm -f "$ENV_FILE"
 
 # Remove this script
 log "Removing first boot script..."
