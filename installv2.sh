@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # Exit on error
-set -e
+set -eX
 
 CLONE_DIR=/root/duckertheduck
 

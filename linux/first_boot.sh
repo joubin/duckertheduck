@@ -80,9 +80,6 @@ if [ -f "/etc/systemd/system/first_boot.service" ]; then
     systemctl daemon-reload
 fi
 
-# Clean up environment file
-log "Removing environment file..."
-rm -f "$ENV_FILE"
 
 # Remove this script
 log "Removing first boot script..."
