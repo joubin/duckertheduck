@@ -59,6 +59,9 @@ if ! curl -fsSL https://tailscale.com/install.sh | sh; then
     exit 1
 fi
 
+# Reset the flags because the tailscail script unsets them 
+set -eX
+
 # Enable and start Tailscale daemon service
 log "Enabling and starting Tailscale daemon service..."
 systemctl enable tailscaled.service
