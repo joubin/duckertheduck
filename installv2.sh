@@ -86,7 +86,7 @@ main() {
 
     # Install files with correct permissions
     log "Installing files..."
-    install -m 644 "${CLONE_DIR}/linux/sound_sensor.serivce" /etc/systemd/system/linux/sound_sensor.serivce
+    install -m 644 "${CLONE_DIR}/linux/sound_sensor.service" /etc/systemd/system/sound_sensor.service
     install -m 644 "${CLONE_DIR}/linux/first_boot.service" /etc/systemd/system/first_boot.service
     install -m 755 "${CLONE_DIR}/linux/first_boot.sh" /first_boot.sh
 
