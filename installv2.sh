@@ -3,6 +3,8 @@
 # Exit on error
 set -e
 
+CLONE_DIR=/root/duckertheduck
+
 # Function to log messages
 log() {
     echo "[$(date '+%Y-%m-%d %H:%M:%S')] $1"
@@ -38,6 +40,11 @@ ensure_requirements() {
         packages+=("curl")
     fi
 
+    # Check for git
+    if ! command -v git >/dev/null 2>&1; then
+        packages+=("git")
+    fi
+
     # If packages need to be installed
     if [ ${#packages[@]} -ne 0 ]; then
         log "Installing required packages: ${packages[*]}"
@@ -67,25 +74,20 @@ main() {
     TEMP_DIR=$(mktemp -d)
     trap 'rm -rf "$TEMP_DIR"' EXIT
 
-    # Download files
-    log "Downloading required files..."
+    # Clone the repository
+    log "Cloning repository..."
+    git clone https://github.com/joubin/duckertheduck.git ${CLONE_DIR}
     
-    # Download service file
-    curl -sSL -o "$TEMP_DIR/first_boot.service" "https://raw.githubusercontent.com/joubin/duckertheduck/refs/heads/main/linux/first_boot.service"
-    
-    # Download main script
-    curl -sSL -o "$TEMP_DIR/first_boot.sh" "https://raw.githubusercontent.com/joubin/duckertheduck/refs/heads/main/linux/first_boot.sh"
-
-    # Verify downloads
-    if [ ! -f "$TEMP_DIR/first_boot.service" ] || [ ! -f "$TEMP_DIR/first_boot.sh" ]; then
-        log "Error: Failed to download required files"
+    # Check if clone was successful
+    if [ ! -d "${CLONE_DIR}" ]; then
+        log "Error: Failed to clone repository"
         exit 1
     fi
 
     # Install files with correct permissions
     log "Installing files..."
-    install -m 644 "$TEMP_DIR/first_boot.service" /etc/systemd/system/first_boot.service
-    install -m 755 "$TEMP_DIR/first_boot.sh" /first_boot.sh
+    install -m 644 "${CLONE_DIR}/first_boot.service" /etc/systemd/system/first_boot.service
+    install -m 755 "${CLONE_DIR}/first_boot.sh" /first_boot.sh
 
     # Create environment file if TAILSCALE_AUTH_KEY is provided
     if [ -n "$TAILSCALE_AUTH_KEY" ]; then
