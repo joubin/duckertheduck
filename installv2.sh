@@ -86,16 +86,10 @@ main() {
 
     # Install files with correct permissions
     log "Installing files..."
-    install -m 644 "${CLONE_DIR}/first_boot.service" /etc/systemd/system/first_boot.service
-    install -m 755 "${CLONE_DIR}/first_boot.sh" /first_boot.sh
+    install -m 644 "${CLONE_DIR}/linux/sound_sensor.service" /etc/systemd/system/sound_sensor.service
+    install -m 644 "${CLONE_DIR}/linux/first_boot.service" /etc/systemd/system/first_boot.service
+    install -m 755 "${CLONE_DIR}/linux/first_boot.sh" /first_boot.sh
 
-    # Create environment file if TAILSCALE_AUTH_KEY is provided
-    if [ -n "$TAILSCALE_AUTH_KEY" ]; then
-        log "Creating environment file..."
-        echo "TAILSCALE_AUTH_KEY=$TAILSCALE_AUTH_KEY" | install -m 600 /dev/stdin /etc/first_boot.env
-    else
-        log "Warning: TAILSCALE_AUTH_KEY not provided. You'll need to create /etc/first_boot.env manually"
-    fi
 
     # Reload systemd and enable service
     log "Configuring systemd..."
