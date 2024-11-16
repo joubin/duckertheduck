@@ -45,6 +45,11 @@ ensure_requirements() {
         packages+=("git")
     fi
 
+    # Check for git
+    if ! command -v pip3 >/dev/null 2>&1; then
+        packages+=("pip3")
+    fi
+
     # If packages need to be installed
     if [ ${#packages[@]} -ne 0 ]; then
         log "Installing required packages: ${packages[*]}"
