@@ -1,0 +1,18 @@
+[Unit]
+Description=First Boot Configuration Service
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=oneshot
+ExecStart=/first_boot.sh
+RemainAfterExit=yes
+StandardOutput=journal
+StandardError=journal
+
+# Restart on failure after 1 minute
+Restart=on-failure
+RestartSec=60
+
+[Install]
+WantedBy=multi-user.target

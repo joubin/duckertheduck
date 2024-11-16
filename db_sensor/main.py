@@ -1,12 +1,20 @@
-from wensn import connect
-from wensn import setMode
-from wensn import readSPL
+# from wensn import connect
+# from wensn import setMode
+# from wensn import readSPL
+import usb.core
 
 import time
 import os
 import socket
 import influxdb_client, os, time
 from influxdb_client import InfluxDBClient, Point, WritePrecision, WriteOptions
+
+def connect():
+    dev = usb.core.find(idVendor=0x16c0, idProduct=0x5dc)
+    assert dev is not None, "Is your sound meter plugged in to USB?"
+    print(dev)
+    return dev
+
 
 if __name__ == "__main__":
     # Setup Influxdb connection
@@ -22,16 +30,15 @@ if __name__ == "__main__":
     dev = connect()
     sensor_id = socket.gethostname()
 
-    setMode(dev)
     while True:
-        dB, range, weight, speed = readSPL(dev)
+        ret = dev.ctrl_transfer(0xC0, 4, 0, 0, 200)
+        dB = (ret[0] + ((ret[1] & 3) * 256)) * 0.1 + 30
+        dB = round(dB, 1)  # Round to one decimal place
         write_api.write(bucket=bucket, org=org, record={
             "measurement": "sound_sensor",
             "tags": {
                 "sensor_id": sensor_id,
                 "range": range,
-                "weight": weight,
-                "speed": speed,
             },
             "fields": {
                 "dB": dB
