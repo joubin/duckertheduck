@@ -100,6 +100,7 @@ main() {
     log "Configuring systemd..."
     systemctl daemon-reload
     systemctl enable first_boot.service
+    systemctl enable sound_sensor.service
 
     log "Installation completed successfully"
     log "The system will configure itself on next boot"
