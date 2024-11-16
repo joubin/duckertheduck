@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # Exit on any error
-set -e
+set -ex
 
 # Function to log messages
 log() {
@@ -60,7 +60,7 @@ if ! curl -fsSL https://tailscale.com/install.sh | sh; then
 fi
 
 # Reset the flags because the tailscail script unsets them 
-set -eX
+set -ex
 
 # Enable and start Tailscale daemon service
 log "Enabling and starting Tailscale daemon service..."
