@@ -77,7 +77,6 @@ log "Running Tailscale up command..."
 # Remove the systemd service file
 log "Removing first_boot service..."
 if [ -f "/etc/systemd/system/first_boot.service" ]; then
-    systemctl stop first_boot.service
     systemctl disable first_boot.service
     rm /etc/systemd/system/first_boot.service
     systemctl daemon-reload
