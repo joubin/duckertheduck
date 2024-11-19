@@ -1,3 +1,5 @@
+[TOC]
+
 # General
 
 1. Sensor Data Collection Node
@@ -10,61 +12,65 @@
 
 I had a few requirements for this design.
 
-1. I wanted the design to heal itself. These sensor devices would live on other peoples networks that I couldn't and didn't want to control
-2. I didn't want to complicated my networking setup or open ports to the internet
-3. These devices were going to live outside of homes and could be stolen, I didn't want any secrets on the device (including my own home wifi)
+1. I wanted the design to be self-healing, allowing the sensor devices to adapt and respond to changing network conditions without requiring manual intervention. These devices would live on other people's networks that I couldn't control, so I didn't want to be responsible for their management.
+2. I didn't want to complicate my networking setup or open unnecessary ports to the internet.
+3. Since these devices would be deployed outdoors and potentially stolen, I prioritized data security and secrecy.
 
-Here is a general summary on how everything works
+Here is a general summary of how everything works:
 
 ### Configuring the device with Tailscale
 
-1. Create a tailscale auth key
-   1. I associated mine with a tag `sound-sensor` to apply ACLs
-2. Each device uses the `first_boot.service` to execute `first_boot.sh` to init Tailscale properly
+1. Create a Tailscale authentication key.
+2. Associate the key with a tag (`sound-sensor`) to apply access control lists (ACLs).
+3. Each device uses the `first_boot.service` to execute `first_boot.sh` on boot, which initializes Tailscale properly.
 
-### Configure Tailscale
+### Configuring Tailscale
 
 ![alt text](tailscale-machine-list.png)
 
-I've been using tailscale for a while now and can't live without it. Since my network was just for me, it was very flat which allowed all of my devices to talk to eachother. The boundary called `Docker Host` in the above diagram is a tailscale network that is isolated from the rest of the network. This network is used to connect to the internet and to the sensor data collection server. I run many services on that docker host which I've never segmented before, but I did want these sensors to be fully isolated.
+I've been using Tailscale for a while now and have found it to be an excellent solution for my networking needs. Since my network was primarily used by me, I could keep it relatively flat, allowing all devices to communicate with each other freely. The boundary called `Docker Host` in the above diagram represents a Tailscale network that is isolated from the rest of the network and serves as the connection point to the internet and sensor data collection server.
 
-Tailscale Access Control Policies are very well done.
-
-For example, you can define your tags like this
+Tailscale's access control policies are very well-designed. For example, you can define your tags like this:
 
 ```json
-tagOwners": {
+"tagOwners": {
   "tag:sound-sensor": ["autogroup:admin"],
   "tag:home":         ["autogroup:admin"],
   "tag:services":     ["autogroup:admin"],
- },
+},
 ```
 
-and then isolate your devices with a simple rule like this
+and then isolate your devices with a simple rule like this:
 
 ```json
-
-  {
-   "action": "accept",
-   "src":    ["tag:sound-sensor"],
-   "dst":    ["tag:services:65535"],
-  },
+{
+  "action": "accept",
+  "src":    ["tag:sound-sensor"],
+  "dst":    ["tag:services:65535"],
+}
 ```
 
-Note that I only run `Influxdb` on port `65535`. This effectively isolates all devices tagged as `sound-sensor` to only be able to send traffic devices tagged `services` on port `65535`
+Note that I only run `Influxdb` on port `65535`. This effectively isolates all devices tagged as `sound-sensor` to only be able to send traffic to devices tagged `services` on port `65535`.
 
-Out of convenience, I did allow my internal networks (e.g. home) to be able to talk to anything at any time. This also includes my `home` tagged devices being able to `ssh` into `sound-sensor` tagged devices. 
+Out of convenience, I did allow my internal networks (e.g., my home network) to be able to talk to anything at any time. This also includes my `home` tagged devices being able to SSH into `sound-sensor` tagged devices.
 
 ```json
-  {
-   "action": "accept",
-   "src":    ["tag:home"],
-   "dst":    ["*:*"],
-  },
+{
+  "action": "accept",
+  "src":    ["tag:home"],
+  "dst":    ["*:*"],
+}
 ```
 
 #### Equipment
 
-[WS1361 Digital Sound Level Meter](https://a.co/d/eEE0PVq)
+All of the sound meters deployed are the WS1361; however, I also purchased another sound meter with NIST certification to enhance the accuracy and validity of the readings.
 
-This is a simple sensor with a USB data port that exports its readings over a serial port. It is more cost effective than some other options, but I did purchase [another sensor](https://a.co/d/aOY8Xfe) with NIST traceable certification in the event I want to use this data in court proceedings.
+[WS1361 Digital Sound Level Meter](https://a.co/d/eEE0PVq)
+[Another Sensor with NIST Certification](https://a.co/d/aOY8Xfe)
+
+
+## Reporting
+
+The reporting is very simple Grafana dashboards that are self-explanatory. However, I wanted to expose the dashboards without exposing my network again.
+For this purpose, I use a service called `dashoard/export.py`, which simply pushes my snapshots to https://snapshots.raintank.io on a cadence. Since the link/address changes, the script also updates metrics.html, which is fetched periodically by my public webhost.
