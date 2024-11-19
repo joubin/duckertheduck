@@ -3,7 +3,6 @@ import time
 import asyncio
 import base64
 import requests
-from dotenv import load_dotenv
 
 
 
@@ -16,8 +15,8 @@ def run(playwright: Playwright):
 
     page.goto("https://grafana.lab.jabbari.io/login")
     time.sleep(1)
-    page.get_by_text(text="email or username").fill("reader")
-    page.get_by_placeholder("password").fill("reader")
+    page.get_by_text(text="email or username").fill(GRAFANA_USER)
+    page.get_by_placeholder("password").fill(GRAFANA_PASS)
     page.get_by_text(text="Log in").click()
     time.sleep(1)
     page.goto("https://grafana.lab.jabbari.io/d/de2url9wvhts0a/sound-levels?kiosk=&from=now-1w&to=now&timezone=browser")
@@ -102,8 +101,11 @@ def run(playwright: Playwright):
 
 while True:
     import os
-    # load_dotenv(dotenv_path='/Users/joubin/Git/duckdeduck/db_sensor/.env')
-    DELAY=os.getenv('DELAY', 900)
+    DELAY= int(os.getenv('DELAY', 900))
+    GRAFANA_USER = os.getenv("GRAFANA_USER")
+    GRAFANA_PASS = os.getenv("GRAFANA_PASS")
+    print(DELAY)
+    print(GRAFANA_PASS)
     TOKEN = os.getenv('GITHUB_METRICS_WRITE_TOKEN')
     print(TOKEN)
     with sync_playwright() as playwright:
