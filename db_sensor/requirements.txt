@@ -1,3 +1,2 @@
 pyusb
 influxdb_client
-dotenv
