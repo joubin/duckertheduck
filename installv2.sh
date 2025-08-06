@@ -45,9 +45,9 @@ ensure_requirements() {
         packages+=("git")
     fi
 
-    # Check for git
+    # Check for python3-pip (which provides pip3)
     if ! command -v pip3 >/dev/null 2>&1; then
-        packages+=("pip3")
+        packages+=("python3-pip")
     fi
 
     # If packages need to be installed
