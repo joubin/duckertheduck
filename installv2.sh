@@ -182,6 +182,16 @@ install_python_requirements() {
 
 
 
+# Function to install the CPU management script (idempotent)
+install_cpu_management_script() {
+    if [ -f "${CLONE_DIR}/linux/cpu_management.sh" ]; then
+        install -m 755 "${CLONE_DIR}/linux/cpu_management.sh" /usr/local/bin/cpu_management
+        log "✓ Installed cpu_management to /usr/local/bin"
+    else
+        log "⚠ Warning: cpu_management.sh not found at ${CLONE_DIR}/linux/"
+    fi
+}
+
 # Function to install and enable systemd services (idempotent)
 install_and_enable_services() {
     log "Installing and enabling systemd services..."
@@ -300,6 +310,9 @@ main() {
     
     # Clone repository
     clone_repository
+
+    # Install CPU management tool from cloned repo
+    install_cpu_management_script
     
     # Install Tailscale
     install_tailscale
