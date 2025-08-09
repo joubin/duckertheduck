@@ -1,6 +1,6 @@
 #!/bin/bash
 
-# Version 4
+# Version 5
 # Exit on error
 set -ex
 
@@ -22,11 +22,7 @@ check_root() {
 
 # Function to check if already installed
 check_already_installed() {
-    if [ -f "$LOCK_FILE" ]; then
-        log "Installation already completed. Lock file exists: $LOCK_FILE"
-        log "To reinstall, remove the lock file: rm $LOCK_FILE"
-        exit 0
-    fi
+    log "Convergent mode: proceeding with updates regardless of prior runs"
 }
 
 # Function to save SD card writes
@@ -251,10 +247,10 @@ install_and_enable_services() {
         log "⚠ Warning: sound_sensor.service not found in /etc/systemd/system/"
     fi
     
-    # Enable board-led.service
+    # Enable board-led.service and start it now
     if [ -f "/etc/systemd/system/board-led.service" ]; then
-        systemctl enable board-led.service
-        log "✓ Enabled board-led.service"
+        systemctl enable --now board-led.service
+        log "✓ Enabled and started board-led.service"
         ((services_enabled++))
     else
         log "⚠ Warning: board-led.service not found in /etc/systemd/system/"
@@ -287,9 +283,7 @@ configure_board_led() {
 
 # Function to create lock file
 create_lock_file() {
-    mkdir -p "$(dirname "$LOCK_FILE")"
-    echo "$(date)" > "$LOCK_FILE"
-    log "Created lock file: $LOCK_FILE"
+    log "Skipping lock file creation to reduce writes"
 }
 
 # Main installation function
