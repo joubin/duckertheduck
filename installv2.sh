@@ -1,5 +1,6 @@
 #!/bin/bash
 
+# Version 4
 # Exit on error
 set -ex
 
